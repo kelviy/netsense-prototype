@@ -48,7 +48,7 @@ function nodeIcon(node: MeshNode) {
     hasLora && hasHalow ? "dual" : "",
     node.status === "degraded" ? "degraded" : "",
   ].filter(Boolean).join(" ");
-  const label = node.id.replace("N-", "");
+  const label = node.name.replace("Mesh Router ", "");
   return L.divIcon({
     className: "",
     html: `<div class="${classes}">${label}</div>`,

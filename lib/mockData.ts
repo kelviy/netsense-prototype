@@ -306,28 +306,28 @@ export const RECOMMENDATIONS = [
     id: "R-1",
     title: "Review Sensor 1 reroute",
     body:
-      "Sensor 1 is currently routing through Sensor 2 to reach the Block A node. Check antenna alignment between Sensor 1, Sensor 2, and Mesh Router 1 to restore the direct path.",
+      "Sensor 1 is currently routing through Sensor 2 to reach Mesh Router 1. Check antenna alignment between Sensor 1, Sensor 2, and Mesh Router 1 to restore the direct path.",
     severity: "warning" as const,
   },
   {
     id: "R-2",
-    title: "Review Sensor 1 to Sensor 2 path",
+    title: "Review Mesh Router 1 to Mesh Router 4 path",
     body:
-      "The Sensor 1 to Sensor 2 reroute is keeping Block A online. Consider tightening placement or signal alignment so Sensor 1 can fail over more efficiently to Mesh Router 1.",
-    severity: "warning" as const,
+      "The Sensor 1 to Sensor 2 reroute is keeping Mesh Router 1 connected through Mesh Router 4. Review placement and signal alignment to reduce dependency on the fallback path.",
+    severity: "info" as const,
   },
   {
     id: "R-3",
-    title: "Replace battery on Block C node",
+    title: "Replace battery on Mesh Router 3",
     body:
-      "Battery at 18%. Estimated 9 days remaining. Recharge to avoid service interruption across 3 sensors in Block C.",
+      "Battery at 18%. Estimated 9 days remaining. Recharge to avoid service interruption across the 3 sensors served by Mesh Router 3.",
     severity: "warning" as const,
   },
   {
     id: "R-4",
-    title: "Update dual-radio node firmware",
+    title: "Update Mesh Router 4 firmware",
     body:
-      "Improves battery life by 15% and stabilises LoRa/HaLow handoff on Block D.",
+      "Improves battery life by 15% and stabilises LoRa/HaLow handoff on Mesh Router 4.",
     severity: "info" as const,
   },
 ];
