@@ -21,7 +21,8 @@ type Props = {
   showNodes?: boolean;
   showFields?: boolean;
   showMeshLinks?: boolean;
-  showNodeRanges?: boolean;
+  showLoraRanges?: boolean;
+  showHalowRanges?: boolean;
   showSensorRanges?: boolean;
   visibleSensorIds?: string[]; // for setup animation
   onSensorClick?: (id: string) => void;
@@ -40,17 +41,19 @@ function sensorIcon(sensor: Sensor, highlight = false) {
 }
 
 function nodeIcon(node: MeshNode) {
+  const hasLora = node.radios.includes("lora_node");
+  const hasHalow = node.radios.includes("halow_node");
   const classes = [
     "node-pin",
-    node.type === "gateway" ? "gateway" : "",
+    hasLora && hasHalow ? "dual" : "",
     node.status === "degraded" ? "degraded" : "",
   ].filter(Boolean).join(" ");
-  const label = node.type === "gateway" ? "GW" : node.id.replace("N-", "");
+  const label = node.id.replace("N-", "");
   return L.divIcon({
     className: "",
     html: `<div class="${classes}">${label}</div>`,
-    iconSize: node.type === "gateway" ? [34, 34] : [28, 28],
-    iconAnchor: node.type === "gateway" ? [17, 17] : [14, 14],
+    iconSize: hasLora && hasHalow ? [32, 32] : [28, 28],
+    iconAnchor: hasLora && hasHalow ? [16, 16] : [14, 14],
   });
 }
 
@@ -71,7 +74,8 @@ export default function FarmMap({
   showNodes = true,
   showFields = true,
   showMeshLinks = true,
-  showNodeRanges = false,
+  showLoraRanges = false,
+  showHalowRanges = false,
   showSensorRanges = false,
   visibleSensorIds,
   onSensorClick,
@@ -91,6 +95,10 @@ export default function FarmMap({
     const seen = new Set<string>();
     for (const n of NODES) {
       for (const nid of n.neighbours) {
+        if (
+          (n.id === "N-02" && nid === "N-05") ||
+          (n.id === "N-05" && nid === "N-02")
+        ) continue;
         const key = [n.id, nid].sort().join("-");
         if (seen.has(key)) continue;
         seen.add(key);
@@ -162,20 +170,40 @@ export default function FarmMap({
           </Polygon>
         ))}
 
-      {/* Node range circles */}
-      {showNodeRanges &&
+      {/* Node LoRa range circles */}
+      {showLoraRanges &&
         NODES.map((n) => (
-          <Circle
-            key={`r-${n.id}`}
-            center={[n.lat, n.lng]}
-            radius={n.rangeKm * 1000}
-            pathOptions={{
-              color: n.status === "degraded" ? "#d97706" : n.type === "gateway" ? "#0ea5e9" : "#16a34a",
-              weight: 1,
-              fillOpacity: 0.06,
-              dashArray: "4 4",
-            }}
-          />
+          n.loraRangeKm ? (
+            <Circle
+              key={`lr-${n.id}`}
+              center={[n.lat, n.lng]}
+              radius={n.loraRangeKm * 1000}
+              pathOptions={{
+                color: n.status === "degraded" ? "#d97706" : "#16a34a",
+                weight: 1,
+                fillOpacity: 0.06,
+                dashArray: "4 4",
+              }}
+            />
+          ) : null
+        ))}
+
+      {/* Node HaLow range circles */}
+      {showHalowRanges &&
+        NODES.map((n) => (
+          n.halowRangeKm ? (
+            <Circle
+              key={`hr-${n.id}`}
+              center={[n.lat, n.lng]}
+              radius={n.halowRangeKm * 1000}
+              pathOptions={{
+                color: "#0ea5e9",
+                weight: 1,
+                fillOpacity: 0.05,
+                dashArray: "8 5",
+              }}
+            />
+          ) : null
         ))}
 
       {/* Sensor LoRa range (1km) */}
@@ -230,18 +258,38 @@ export default function FarmMap({
           );
         })}
 
-      {/* Broken link — S-008 to N-02 (thin red) to show original path is gone */}
+      {/* Highlighted route for network page — N-02 to N-05 via S-003 and S-012 */}
       {showMeshLinks && mode === "network" && (
         <Polyline
           positions={[
-            [getSensor("S-008")!.lat, getSensor("S-008")!.lng],
             [getNode("N-02")!.lat, getNode("N-02")!.lng],
+            [getSensor("S-003")!.lat, getSensor("S-003")!.lng],
+            [getSensor("S-012")!.lat, getSensor("S-012")!.lng],
+            [getNode("N-05")!.lat, getNode("N-05")!.lng],
           ]}
           pathOptions={{
-            color: "#dc2626",
+            color: "#d97706",
             weight: 1,
-            opacity: 0.7,
-            dashArray: "2 6",
+            opacity: 0.9,
+            dashArray: "4 6",
+            className: "mesh-link-active highlight-route-active",
+          }}
+        />
+      )}
+
+      {/* Highlighted route for dashboard — direct N-02 to N-05 */}
+      {showMeshLinks && mode === "dashboard" && (
+        <Polyline
+          positions={[
+            [getNode("N-02")!.lat, getNode("N-02")!.lng],
+            [getNode("N-05")!.lat, getNode("N-05")!.lng],
+          ]}
+          pathOptions={{
+            color: "#d97706",
+            weight: 3,
+            opacity: 0.95,
+            dashArray: "6 6",
+            className: "mesh-link-active dashboard-route-active",
           }}
         />
       )}
@@ -283,7 +331,7 @@ export default function FarmMap({
             <Tooltip>
               <strong>{n.name}</strong>
               <br />
-              {n.status} · {n.connectedSensors} sensors · {n.rangeKm}km range
+              {n.status} · {n.connectedSensors} sensors
             </Tooltip>
           </Marker>
         ))}

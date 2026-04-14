@@ -16,12 +16,16 @@ import { NODES, SENSORS, RECOMMENDATIONS, getNode } from "@/lib/mockData";
 import type { MeshNode } from "@/lib/types";
 
 export default function NetworkPage() {
-  const [showNodeRanges, setShowNodeRanges] = useState(true);
+  const [showLoraRanges, setShowLoraRanges] = useState(true);
+  const [showHalowRanges, setShowHalowRanges] = useState(true);
   const [showSensorRanges, setShowSensorRanges] = useState(false);
   const [sortKey, setSortKey] = useState<"id" | "battery" | "status">("id");
   const [selected, setSelected] = useState<MeshNode | null>(null);
 
-  const onlineCount = NODES.filter((n) => n.status === "online").length;
+  const healthyCount = NODES.filter((n) => n.status === "online").length;
+  const degradedCount = NODES.filter((n) => n.status === "degraded").length;
+  const loraNodeCount = NODES.filter((n) => n.radios.includes("lora_node")).length;
+  const halowNodeCount = NODES.filter((n) => n.radios.includes("halow_node")).length;
 
   const sorted = [...NODES].sort((a, b) => {
     if (sortKey === "battery") return a.battery - b.battery;
@@ -40,8 +44,28 @@ export default function NetworkPage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Kpi label="Total nodes" value={`${NODES.length}`} icon={<Radio className="w-4 h-4 text-primary" />} />
-        <Kpi label="Online" value={`${onlineCount} / ${NODES.length}`} icon={<Zap className="w-4 h-4 text-green-600" />} />
+        <Card>
+          <CardBody className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Total nodes</span>
+              <Radio className="w-4 h-4 text-primary" />
+            </div>
+            <div className="text-2xl font-bold">{NODES.length}</div>
+            <div className="text-xs text-muted-foreground">
+              {loraNodeCount} LoRa Nodes · {halowNodeCount} WiFi HaLow nodes
+            </div>
+          </CardBody>
+        </Card>
+        <Card>
+          <CardBody className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Healthy</span>
+              <Zap className="w-4 h-4 text-green-600" />
+            </div>
+            <div className="text-2xl font-bold">{healthyCount} / {NODES.length}</div>
+            <Badge tone="amber" className="w-fit">{degradedCount} degraded mesh node</Badge>
+          </CardBody>
+        </Card>
         <Kpi label="Sensors served" value={`${SENSORS.length}`} icon={<Signal className="w-4 h-4 text-blue-500" />} />
         <Card>
           <CardBody className="flex flex-col gap-1">
@@ -50,20 +74,25 @@ export default function NetworkPage() {
               <ShieldCheck className="w-4 h-4 text-green-600" />
             </div>
             <div className="text-2xl font-bold">Good</div>
-            <Badge tone="green" className="w-fit">Self-healing active</Badge>
+            <Badge tone="green" className="w-fit">Redundant nodes &gt; 80%</Badge>
           </CardBody>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <Card className="lg:col-span-3 overflow-hidden">
+        <Card className="lg:col-span-3 overflow-hidden relative z-0">
           <CardHeader className="flex flex-wrap items-center justify-between gap-2 flex-row py-2">
             <CardTitle>Mesh topology</CardTitle>
             <div className="flex flex-wrap gap-1.5 text-xs">
               <ToggleChip
-                on={showNodeRanges}
-                set={setShowNodeRanges}
-                label="Node ranges"
+                on={showLoraRanges}
+                set={setShowLoraRanges}
+                label="LoRa ranges"
+              />
+              <ToggleChip
+                on={showHalowRanges}
+                set={setShowHalowRanges}
+                label="HaLow ranges"
               />
               <ToggleChip
                 on={showSensorRanges}
@@ -72,14 +101,15 @@ export default function NetworkPage() {
               />
             </div>
           </CardHeader>
-          <div className="h-[540px] w-full">
+          <div className="h-[540px] w-full relative z-0">
             <DynamicFarmMap
               mode="network"
               showFields={true}
               showSensors={true}
               showNodes={true}
               showMeshLinks={true}
-              showNodeRanges={showNodeRanges}
+              showLoraRanges={showLoraRanges}
+              showHalowRanges={showHalowRanges}
               showSensorRanges={showSensorRanges}
               onNodeClick={(id) => setSelected(getNode(id) ?? null)}
             />
@@ -157,7 +187,7 @@ export default function NetworkPage() {
                   <td className="px-3 py-2">
                     <div className="font-medium">{n.name}</div>
                     <div className="text-xs text-muted-foreground">
-                      {n.type.replace("_", " ")}
+                      {formatNodeRadios(n)}
                     </div>
                   </td>
                   <td className="px-3 py-2">
@@ -177,7 +207,7 @@ export default function NetworkPage() {
                     <BatteryCell pct={n.battery} />
                   </td>
                   <td className="px-3 py-2">{n.connectedSensors}</td>
-                  <td className="px-3 py-2">{n.rangeKm} km</td>
+                  <td className="px-3 py-2">{formatNodeRanges(n)}</td>
                 </tr>
               ))}
             </tbody>
@@ -273,10 +303,10 @@ function ToggleChip({
 function NodeDialog({ node, onClose }: { node: MeshNode; onClose: () => void }) {
   return (
     <div
-      className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/40 z-[2000] flex items-center justify-center p-4"
       onClick={onClose}
     >
-      <Card className="max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+      <Card className="max-w-md w-full relative z-[2001]" onClick={(e) => e.stopPropagation()}>
         <CardHeader className="flex items-center justify-between flex-row py-3">
           <CardTitle>{node.name}</CardTitle>
           <button onClick={onClose}>
@@ -296,19 +326,34 @@ function NodeDialog({ node, onClose }: { node: MeshNode; onClose: () => void }) 
             >
               {node.status}
             </Badge>
-            <Badge tone="slate">{node.type.replace("_", " ")}</Badge>
+            <Badge tone="slate">{formatNodeRadios(node)}</Badge>
           </div>
           <Row label="Node ID" value={node.id} />
           <Row label="Uptime" value={node.uptime} />
           <Row label="Signal strength" value={`${node.signalStrength}%`} />
           <Row label="Battery" value={`${node.battery}%`} />
-          <Row label="Range" value={`${node.rangeKm} km`} />
+          <Row label="Ranges" value={formatNodeRanges(node)} />
           <Row label="Connected sensors" value={`${node.connectedSensors}`} />
           <Row label="Neighbours" value={node.neighbours.join(", ") || "—"} />
         </CardBody>
       </Card>
     </div>
   );
+}
+
+function formatNodeRadios(node: MeshNode) {
+  return node.radios
+    .map((radio) => radio === "lora_node" ? "LoRa" : radio === "halow_node" ? "HaLow" : "Gateway")
+    .join(" + ");
+}
+
+function formatNodeRanges(node: MeshNode) {
+  const ranges = [
+    node.loraRangeKm ? `LoRa ${node.loraRangeKm} km` : null,
+    node.halowRangeKm ? `HaLow ${node.halowRangeKm} km` : null,
+  ].filter(Boolean);
+
+  return ranges.join(" · ") || "—";
 }
 
 function Row({ label, value }: { label: string; value: string }) {

@@ -66,6 +66,9 @@ html, body {
   font-size: 10px; font-weight: 700;
   box-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
+.node-pin.dual {
+  background: linear-gradient(135deg, #1f4d2e 0%, #1f4d2e 50%, #0ea5e9 50%, #0ea5e9 100%);
+}
 .node-pin.gateway { background: #0f172a; width: 34px; height: 34px; font-size: 11px; }
 .node-pin.degraded { background: #d97706; animation: pulse-amber 2s infinite; }
 
@@ -82,6 +85,14 @@ html, body {
 .mesh-link-active {
   stroke-dasharray: 6 6;
   animation: dash-flow 1.2s linear infinite;
+}
+.leaflet-interactive.highlight-route-active {
+  stroke-dasharray: 4 6;
+  animation: dash-flow 1s linear infinite;
+}
+.leaflet-interactive.dashboard-route-active {
+  stroke-dasharray: 6 6;
+  animation: dash-flow 1s linear infinite;
 }
 @keyframes dash-flow {
   to { stroke-dashoffset: -24; }

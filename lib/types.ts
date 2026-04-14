@@ -1,6 +1,6 @@
 export type SensorType = "soil_moisture" | "temperature" | "humidity" | "ph";
 export type SensorStatus = "online" | "offline" | "warning";
-export type NodeType = "gateway" | "lora_node" | "halow_node";
+export type NodeRadio = "gateway" | "lora_node" | "halow_node";
 export type NodeStatus = "online" | "degraded" | "offline";
 export type AlertSeverity = "critical" | "warning" | "info";
 
@@ -22,7 +22,7 @@ export interface Sensor {
 export interface MeshNode {
   id: string;
   name: string;
-  type: NodeType;
+  radios: NodeRadio[];
   lat: number;
   lng: number;
   status: NodeStatus;
@@ -31,7 +31,8 @@ export interface MeshNode {
   battery: number;
   uptime: string;
   signalStrength: number;
-  rangeKm: number;
+  loraRangeKm?: number;
+  halowRangeKm?: number;
 }
 
 export interface Alert {

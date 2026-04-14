@@ -253,7 +253,7 @@ export default function SensorDetailPage({
                     than the seasonal average.
                   </Insight>
                   <Insight>
-                    Recommended action: irrigate Block A North within <b>6 hours</b>.
+                    Recommended action: irrigate Sensor 1 within <b>6 hours</b>.
                     Estimated <b>4,200 L</b> required.
                   </Insight>
                   <Insight>
@@ -383,7 +383,7 @@ export default function SensorDetailPage({
               {dialog === "irrigate" ? (
                 <>
                   <p>
-                    Schedule <b>4,200 L</b> irrigation for Block A North, starting in
+                    Schedule <b>4,200 L</b> irrigation for Sensor 1, starting in
                     the next 2 hours?
                   </p>
                   <div className="flex items-center gap-2 text-green-700">
