@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import {
-  Battery,
   Signal,
   Radio,
   ShieldCheck,
@@ -11,7 +10,7 @@ import {
   Zap,
 } from "lucide-react";
 import DynamicFarmMap from "@/components/DynamicFarmMap";
-import { Card, CardBody, CardHeader, CardTitle, Badge, Button } from "@/components/ui";
+import { Card, CardBody, CardHeader, CardTitle, Badge } from "@/components/ui";
 import { NODES, SENSORS, RECOMMENDATIONS, getNode } from "@/lib/mockData";
 import type { MeshNode } from "@/lib/types";
 
@@ -31,7 +30,7 @@ export default function NetworkPage() {
   const sorted = [...NODES].sort((a, b) => {
     if (sortKey === "battery") return a.battery - b.battery;
     if (sortKey === "status") return a.status.localeCompare(b.status);
-    return a.id.localeCompare(b.id);
+    return formatNodeDisplayId(a).localeCompare(formatNodeDisplayId(b));
   });
 
   return (
@@ -189,7 +188,7 @@ export default function NetworkPage() {
                   onClick={() => setSelected(n)}
                   className="border-t border-border hover:bg-muted cursor-pointer"
                 >
-                  <td className="px-3 py-2 font-mono text-xs">{n.id}</td>
+                  <td className="px-3 py-2 font-mono text-xs">{formatNodeDisplayId(n)}</td>
                   <td className="px-3 py-2">
                     <div className="font-medium">{n.name}</div>
                     <div className="text-xs text-muted-foreground">
@@ -334,7 +333,7 @@ function NodeDialog({ node, onClose }: { node: MeshNode; onClose: () => void }) 
             </Badge>
             <Badge tone="slate">{formatNodeRadios(node)}</Badge>
           </div>
-          <Row label="Node ID" value={node.id} />
+          <Row label="Node ID" value={formatNodeDisplayId(node)} />
           <Row label="Uptime" value={node.uptime} />
           <Row label="Signal strength" value={`${node.signalStrength}%`} />
           <Row label="Battery" value={`${node.battery}%`} />
@@ -351,6 +350,10 @@ function formatNodeRadios(node: MeshNode) {
   return node.radios
     .map((radio) => radio === "lora_node" ? "LoRa" : radio === "halow_node" ? "HaLow" : "Gateway")
     .join(" + ");
+}
+
+function formatNodeDisplayId(node: MeshNode) {
+  return node.name.replace("Mesh Router ", "MR-");
 }
 
 function formatNodeRanges(node: MeshNode) {

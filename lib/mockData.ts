@@ -188,7 +188,7 @@ export const ALERTS: Alert[] = [
     severity: "warning",
     title: "Battery low — Block C",
     message:
-      "Node for Block C battery at 18%. Recharge within 9 days to avoid service interruption.",
+      "Mesh Router 3 for Block C battery at 18%. Recharge within 9 days to avoid service interruption.",
     sensorId: "",
     timestamp: "2 hr ago",
     estimatedImpact: "Service risk: 3 sensors in Block C",
@@ -306,18 +306,18 @@ export const WEATHER = {
 };
 
 export const RECOMMENDATIONS = [
-  {
+    {
     id: "R-1",
-    title: "Review Sensor 1 reroute",
+    title: "Review Mesh Router 1 to Mesh Router 4 path",
     body:
-      "Sensor 1 is currently routing through Sensor 2 to reach Mesh Router 1. Check antenna alignment between Sensor 1, Sensor 2, and Mesh Router 1 to restore the direct path.",
+      "The Sensor 1 to Sensor 2 reroute is keeping Mesh Router 1 connected through Mesh Router 4. Review placement and signal alignment to reduce dependency on the fallback path.",
     severity: "warning" as const,
   },
   {
     id: "R-2",
-    title: "Review Mesh Router 1 to Mesh Router 4 path",
+    title: "Review Sensor 1 reroute",
     body:
-      "The Sensor 1 to Sensor 2 reroute is keeping Mesh Router 1 connected through Mesh Router 4. Review placement and signal alignment to reduce dependency on the fallback path.",
+      "Sensor 1 is currently routing through Sensor 2 to reach Mesh Router 1. Check antenna alignment of Mesh Router 1 to restore the direct path.",
     severity: "info" as const,
   },
   {
