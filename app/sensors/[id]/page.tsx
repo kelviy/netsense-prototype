@@ -320,7 +320,7 @@ export default function SensorDetailPage({
                     Estimated <b>4,200 L</b> required.
                   </Insight>
                   <Insight>
-                    Historical correlation: similar moisture patterns in 2024 led to
+                    Historical correlation: similar moisture patterns in 2025 led to
                     an <b>8% yield reduction</b> in Block A.
                   </Insight>
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center justify-between">
