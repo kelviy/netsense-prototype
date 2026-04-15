@@ -188,8 +188,8 @@ export default function SensorDetailPage({
                 ))}
               </div>
             </CardHeader>
-            <CardBody className="h-[340px]">
-              <ResponsiveContainer width="100%" height="100%">
+            <CardBody className="h-[340px] min-w-0">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
                 <AreaChart data={sliced} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
@@ -287,8 +287,8 @@ export default function SensorDetailPage({
                 <CardHeader className="py-3">
                   <CardTitle>Benchmark — sensor vs block vs farm</CardTitle>
                 </CardHeader>
-                <CardBody className="h-[340px]">
-                  <ResponsiveContainer width="100%" height="100%">
+                <CardBody className="h-[340px] min-w-0">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
                     <LineChart data={comparison} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                       <XAxis dataKey="day" tick={{ fontSize: 11 }} />

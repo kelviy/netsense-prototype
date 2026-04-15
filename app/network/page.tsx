@@ -16,6 +16,7 @@ import { NODES, SENSORS, RECOMMENDATIONS, getNode } from "@/lib/mockData";
 import type { MeshNode } from "@/lib/types";
 
 export default function NetworkPage() {
+  const [showFields, setShowFields] = useState(true);
   const [showLoraRanges, setShowLoraRanges] = useState(true);
   const [showHalowRanges, setShowHalowRanges] = useState(true);
   const [showSensorRanges, setShowSensorRanges] = useState(false);
@@ -85,6 +86,11 @@ export default function NetworkPage() {
             <CardTitle>Mesh topology</CardTitle>
             <div className="flex flex-wrap gap-1.5 text-xs">
               <ToggleChip
+                on={showFields}
+                set={setShowFields}
+                label="Fields"
+              />
+              <ToggleChip
                 on={showLoraRanges}
                 set={setShowLoraRanges}
                 label="LoRa ranges"
@@ -104,7 +110,7 @@ export default function NetworkPage() {
           <div className="h-[540px] w-full relative z-0">
             <DynamicFarmMap
               mode="network"
-              showFields={true}
+              showFields={showFields}
               showSensors={true}
               showNodes={true}
               showMeshLinks={true}

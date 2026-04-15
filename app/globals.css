@@ -82,16 +82,19 @@ html, body {
 }
 
 /* Mesh link dashed flow */
-.mesh-link-active {
+.leaflet-overlay-pane svg path.mesh-link-active {
   stroke-dasharray: 6 6;
+  stroke-dashoffset: 0;
   animation: dash-flow 1.2s linear infinite;
 }
-.leaflet-interactive.highlight-route-active {
+.leaflet-overlay-pane svg path.highlight-route-active {
   stroke-dasharray: 4 6;
+  stroke-dashoffset: 0;
   animation: dash-flow 1s linear infinite;
 }
-.leaflet-interactive.dashboard-route-active {
+.leaflet-overlay-pane svg path.dashboard-route-active {
   stroke-dasharray: 6 6;
+  stroke-dashoffset: 0;
   animation: dash-flow 1s linear infinite;
 }
 @keyframes dash-flow {
