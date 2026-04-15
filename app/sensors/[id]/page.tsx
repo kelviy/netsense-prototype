@@ -30,6 +30,7 @@ import { Card, CardBody, CardHeader, CardTitle, Badge, Button } from "@/componen
 import { SENSORS, HISTORY, getSensor, ALERTS } from "@/lib/mockData";
 
 type TimeRange = "24h" | "7d" | "30d";
+const MOCK_NOW = Math.max(...SENSORS.map((s) => new Date(s.lastReadingTime).getTime()));
 
 export default function SensorDetailPage({
   params,
@@ -44,8 +45,15 @@ export default function SensorDetailPage({
 
   const history = useMemo(() => HISTORY[activeSensor.id] ?? [], [activeSensor.id]);
   const sliced = useMemo(() => {
-    const hours = range === "24h" ? 24 : range === "7d" ? 24 * 7 : 24 * 30;
-    return history.slice(-hours).map((p) => ({
+    const end = new Date(activeSensor.lastReadingTime).getTime();
+    const start =
+      end -
+      (range === "24h" ? 24 : range === "7d" ? 24 * 7 : 24 * 30) * 3600_000;
+
+    return history.filter((p) => {
+      const t = new Date(p.t).getTime();
+      return t >= start && t <= end;
+    }).map((p) => ({
       t: p.t,
       v: p.v,
       label:
@@ -59,7 +67,7 @@ export default function SensorDetailPage({
               day: "numeric",
             }),
     }));
-  }, [history, range]);
+  }, [activeSensor.lastReadingTime, history, range]);
 
   // Comparison chart — sensor vs block avg vs farm avg (last 7d daily)
   const comparison = useMemo(() => {
@@ -130,9 +138,10 @@ export default function SensorDetailPage({
               <div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                   {icon}
-                  <span>{typeLabel[sensor.type]}</span>
+                  <span><b>Sensor Type: </b> {typeLabel[sensor.type]}</span>
                   <span>·</span>
-                  <span>{sensor.id}</span>
+                  <span><b>Sensor ID: </b> {sensor.id}</span>
+                  <span>·</span>
                 </div>
                 <h1 className="text-2xl font-bold">{sensor.name}</h1>
                 <div className="text-sm text-muted-foreground mt-1">
@@ -160,12 +169,6 @@ export default function SensorDetailPage({
                   </Badge>
                   <Badge tone="slate">
                     <Battery className="w-3 h-3" /> Battery {sensor.battery}%
-                  </Badge>
-                    <Badge tone="slate">
-                    <MapPin className="w-3 h-3" /> Coordinates: {sensor.lat.toFixed(2)}, {sensor.lng.toFixed(2)}
-                  </Badge>
-                  <Badge>
-                    <Route className="w-3 h-3" /> Routed via {sensor.routedVia}
                   </Badge>
                 </div>
               </div>
@@ -243,6 +246,60 @@ export default function SensorDetailPage({
                   />
                 </AreaChart>
               </ResponsiveContainer>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader className="py-3">
+              <CardTitle>Sensor details</CardTitle>
+            </CardHeader>
+            <CardBody className="p-0">
+              {(() => {
+                const leftColumn = [
+                  ["Sensor ID", sensor.id],
+                  ["Name", sensor.name],
+                  ["Type", typeLabel[sensor.type]],
+                  ["Last reading", `${sensor.lastReading}${sensor.unit}`],
+                  ["Last reading time", formatRelativeTime(sensor.lastReadingTime, MOCK_NOW)],
+                  ["Status", sensor.status],
+                ];
+                const rightColumn = [
+                  ["Battery", `${sensor.battery}%`],
+                  ["Signal strength", `${sensor.signalStrength}%`],
+                  ["Routed via", sensor.routedVia],
+                  ["Block", `Block ${sensor.block}`],
+                  ["Latitude", sensor.lat.toFixed(6)],
+                  ["Longitude", sensor.lng.toFixed(6)],
+                ];
+                const rowCount = Math.max(leftColumn.length, rightColumn.length);
+                const pairedRows = Array.from({ length: rowCount }, (_, index) => [
+                  leftColumn[index],
+                  rightColumn[index],
+                ]);
+                return (
+              <table className="w-full text-sm">
+                <tbody>
+                  {pairedRows.map((pair, index) => (
+                    <tr key={index} className="border-t border-border first:border-t-0">
+                      <td className="w-40 px-4 py-3 text-muted-foreground bg-muted/40">{pair[0]?.[0] ?? ""}</td>
+                      <td className="px-4 py-3 font-medium">{pair[0]?.[1] ?? ""}</td>
+                      {pair[1] ? (
+                        <>
+                          <td className="w-40 px-4 py-3 text-muted-foreground bg-muted/40 border-l border-border">{pair[1][0]}</td>
+                          <td className="px-4 py-3 font-medium">{pair[1][1]}</td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="border-l border-border" />
+                          <td />
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+                );
+              })()}
             </CardBody>
           </Card>
 
@@ -421,4 +478,15 @@ function Insight({ children }: { children: React.ReactNode }) {
       <div>{children}</div>
     </div>
   );
+}
+
+function formatRelativeTime(iso: string, nowMs: number) {
+  const diffMinutes = Math.max(0, Math.round((nowMs - new Date(iso).getTime()) / 60000));
+  if (diffMinutes < 1) return "just now";
+  if (diffMinutes < 60) return `${diffMinutes} min ago`;
+
+  const hours = Math.floor(diffMinutes / 60);
+  const minutes = diffMinutes % 60;
+  if (minutes === 0) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  return `${hours} hour${hours === 1 ? "" : "s"} ${minutes} min ago`;
 }

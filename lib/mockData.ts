@@ -130,46 +130,46 @@ export const SENSORS: Sensor[] = [
   // Block A — one critical (S-001), others OK
   { id: "S-001", name: "Sensor 1", type: "soil_moisture", block: "A",
     lat: -33.8711, lng: 18.9683, status: "warning", battery: 87, signalStrength: 76,
-    lastReading: 18, unit: "%", routedVia: "S-002" },
+    lastReading: 18, lastReadingTime: "2026-04-14T07:55:00Z", unit: "%", routedVia: "S-002" },
   { id: "S-002", name: "Sensor 2", type: "soil_moisture", block: "A",
     lat: -33.8749, lng: 18.9719, status: "online", battery: 92, signalStrength: 81,
-    lastReading: 27, unit: "%", routedVia: "N-02" },
+    lastReading: 27, lastReadingTime: "2026-04-14T07:18:00Z", unit: "%", routedVia: "N-02" },
   { id: "S-003", name: "Sensor 3", type: "temperature", block: "A",
     lat: -33.8786, lng: 18.9751, status: "online", battery: 78, signalStrength: 72,
-    lastReading: 22, unit: "°C", routedVia: "N-02" },
+    lastReading: 22, lastReadingTime: "2026-04-14T06:22:00Z", unit: "°C", routedVia: "N-02" },
 
   // Block B
   { id: "S-004", name: "Sensor 4", type: "soil_moisture", block: "B",
     lat: -33.881293, lng: 19.012687, status: "online", battery: 94, signalStrength: 88,
-    lastReading: 29, unit: "%", routedVia: "N-03" },
+    lastReading: 29, lastReadingTime: "2026-04-14T07:41:00Z", unit: "%", routedVia: "N-03" },
   { id: "S-005", name: "Sensor 5", type: "humidity", block: "B",
     lat: -33.884593, lng: 19.009487, status: "online", battery: 83, signalStrength: 85,
-    lastReading: 58, unit: "%", routedVia: "N-03" },
+    lastReading: 58, lastReadingTime: "2026-04-14T07:09:00Z", unit: "%", routedVia: "N-03" },
   { id: "S-006", name: "Sensor 6", type: "ph", block: "B",
     lat: -33.889393, lng: 19.011587, status: "online", battery: 69, signalStrength: 80,
-    lastReading: 6.4, unit: "pH", routedVia: "N-03" },
+    lastReading: 6.4, lastReadingTime: "2026-04-14T06:47:00Z", unit: "pH", routedVia: "N-03" },
 
   // Block C
   { id: "S-007", name: "Sensor 7", type: "soil_moisture", block: "C",
     lat: -33.8924, lng: 18.9837, status: "online", battery: 90, signalStrength: 82,
-    lastReading: 26, unit: "%", routedVia: "N-04" },
+    lastReading: 26, lastReadingTime: "2026-04-14T07:52:00Z", unit: "%", routedVia: "N-04" },
   { id: "S-008", name: "Sensor 8", type: "soil_moisture", block: "C",
     lat: -33.8955, lng: 18.9874, status: "online", battery: 74, signalStrength: 54,
-    lastReading: 28, unit: "%", routedVia: "N-04" },
+    lastReading: 28, lastReadingTime: "2026-04-14T06:58:00Z", unit: "%", routedVia: "N-04" },
   { id: "S-009", name: "Sensor 9", type: "temperature", block: "C",
     lat: -33.8983, lng: 18.9901, status: "online", battery: 88, signalStrength: 77,
-    lastReading: 21, unit: "°C", routedVia: "N-04" },
+    lastReading: 21, lastReadingTime: "2026-04-14T07:27:00Z", unit: "°C", routedVia: "N-04" },
 
   // Block D
   { id: "S-010", name: "Sensor 10", type: "soil_moisture", block: "D",
     lat: -33.874458, lng: 18.995996, status: "online", battery: 91, signalStrength: 86,
-    lastReading: 31, unit: "%", routedVia: "N-05" },
+    lastReading: 31, lastReadingTime: "2026-04-14T06:35:00Z", unit: "%", routedVia: "N-05" },
   { id: "S-011", name: "Sensor 11", type: "humidity", block: "D",
     lat: -33.878028, lng: 18.997396, status: "online", battery: 77, signalStrength: 82,
-    lastReading: 55, unit: "%", routedVia: "N-05" },
+    lastReading: 55, lastReadingTime: "2026-04-14T07:14:00Z", unit: "%", routedVia: "N-05" },
   { id: "S-012", name: "Sensor 12", type: "ph", block: "D",
     lat: -33.881158, lng: 18.992296, status: "online", battery: 85, signalStrength: 84,
-    lastReading: 6.7, unit: "pH", routedVia: "N-05" },
+    lastReading: 6.7, lastReadingTime: "2026-04-14T06:11:00Z", unit: "pH", routedVia: "N-05" },
 ];
 
 export const ALERTS: Alert[] = [
@@ -243,37 +243,41 @@ export const ACTIVITY: ActivityEvent[] = [
 
 // ---- History generation (seeded, runs once at module load) -----------------
 function generateHistory(
-  sensorId: string,
-  base: number,
+  sensor: Sensor,
   unit: string,
   trend: number,
   volatility: number
 ): HistoryPoint[] {
-  const rng = seedrandom(sensorId);
+  const rng = seedrandom(sensor.id);
   const points: HistoryPoint[] = [];
   const HOURS = 24 * 30;
-  const now = new Date("2026-04-14T08:00:00Z").getTime();
+  const now = new Date(sensor.lastReadingTime).getTime();
   for (let i = HOURS; i >= 0; i--) {
     const t = new Date(now - i * 3600_000);
-    const progress = (HOURS - i) / HOURS;
-    const drift = trend * progress;
+    const remaining = i / HOURS;
+    const drift = trend * remaining;
     const dayCycle = Math.sin((t.getUTCHours() / 24) * Math.PI * 2) * (unit === "°C" ? 3 : 2);
     const noise = (rng() - 0.5) * volatility;
-    const v = base + drift + dayCycle + noise;
+    const anchorOffset = i === 0 ? 0 : noise;
+    const v = sensor.lastReading + drift + dayCycle * remaining + anchorOffset;
     points.push({ t: t.toISOString(), v: Math.round(v * 10) / 10 });
   }
+  points[points.length - 1] = {
+    t: sensor.lastReadingTime,
+    v: sensor.lastReading,
+  };
   return points;
 }
 
 const HISTORY_MAP: Record<string, HistoryPoint[]> = {};
 for (const s of SENSORS) {
-  let base = 28, trend = 0, vol = 2;
-  if (s.id === "S-001") { base = 30; trend = -13; vol = 1.4; }
-  else if (s.type === "soil_moisture") { base = 28; trend = -1; vol = 2; }
-  else if (s.type === "temperature") { base = 22; trend = -1; vol = 3; }
-  else if (s.type === "humidity") { base = 58; trend = 0; vol = 6; }
-  else if (s.type === "ph") { base = 6.5; trend = 0; vol = 0.3; }
-  HISTORY_MAP[s.id] = generateHistory(s.id, base, s.unit, trend, vol);
+  let trend = 0, vol = 2;
+  if (s.id === "S-001") { trend = 13; vol = 1.4; }
+  else if (s.type === "soil_moisture") { trend = 1; vol = 2; }
+  else if (s.type === "temperature") { trend = 1; vol = 3; }
+  else if (s.type === "humidity") { trend = 0; vol = 6; }
+  else if (s.type === "ph") { trend = 0; vol = 0.3; }
+  HISTORY_MAP[s.id] = generateHistory(s, s.unit, trend, vol);
 }
 
 export const HISTORY = HISTORY_MAP;

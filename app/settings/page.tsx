@@ -22,7 +22,7 @@ export default function SettingsPage() {
         </CardHeader>
         <CardBody className="text-sm space-y-1">
           <div><span className="text-muted-foreground">Owner: </span>Janneke du Plessis</div>
-          <div><span className="text-muted-foreground">Plan: </span>Grower (self-hosted mesh)</div>
+          <div><span className="text-muted-foreground">Plan: </span>Grower</div>
         </CardBody>
       </Card>
     </div>

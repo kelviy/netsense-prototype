@@ -39,7 +39,7 @@ export default function NetworkPage() {
       <div>
         <h1 className="text-2xl font-bold">Network health</h1>
         <div className="text-xs text-muted-foreground">
-          Decentralised mesh topology — self-healing, farmer-owned.
+          Decentralised mesh topology — resilient, farmer-owned network.
         </div>
       </div>
 

@@ -15,6 +15,7 @@ export interface Sensor {
   battery: number;
   signalStrength: number;
   lastReading: number;
+  lastReadingTime: string;
   unit: "%" | "°C" | "pH";
   routedVia: string;
 }
