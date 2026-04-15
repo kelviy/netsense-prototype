@@ -4,12 +4,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   Battery,
-  Signal,
   Droplets,
   Thermometer,
   Activity,
   CheckCircle2,
   X,
+  MapPin,
+  Route,
 } from "lucide-react";
 import {
   AreaChart,
@@ -37,11 +38,11 @@ export default function SensorDetailPage({
 }) {
   const { id } = use(params);
   const sensor = getSensor(id);
+  const activeSensor = sensor ?? SENSORS[0];
   const [range, setRange] = useState<TimeRange>("30d");
   const [dialog, setDialog] = useState<null | "irrigate" | "resolved">(null);
-  if (!sensor) return notFound();
 
-  const history = HISTORY[sensor.id] ?? [];
+  const history = useMemo(() => HISTORY[activeSensor.id] ?? [], [activeSensor.id]);
   const sliced = useMemo(() => {
     const hours = range === "24h" ? 24 : range === "7d" ? 24 * 7 : 24 * 30;
     return history.slice(-hours).map((p) => ({
@@ -72,14 +73,14 @@ export default function SensorDetailPage({
       const sensorVals = history.slice(startIdx, endIdx).map((p) => p.v);
       const sensorAvg = sliceAvg(sensorVals);
       const blockSensors = SENSORS.filter(
-        (s) => s.block === sensor.block && s.type === sensor.type
+        (s) => s.block === activeSensor.block && s.type === activeSensor.type
       );
       const blockAvg = sliceAvg(
         blockSensors.flatMap((s) =>
           HISTORY[s.id]?.slice(startIdx, endIdx).map((p) => p.v) ?? []
         )
       );
-      const farmSensors = SENSORS.filter((s) => s.type === sensor.type);
+      const farmSensors = SENSORS.filter((s) => s.type === activeSensor.type);
       const farmAvg = sliceAvg(
         farmSensors.flatMap((s) =>
           HISTORY[s.id]?.slice(startIdx, endIdx).map((p) => p.v) ?? []
@@ -87,7 +88,7 @@ export default function SensorDetailPage({
       );
       rows.push({
         day: new Date(
-          history[endIdx - 1]?.t ?? Date.now()
+          history[endIdx - 1]?.t ?? "2026-04-14T08:00:00Z"
         ).toLocaleDateString([], { month: "short", day: "numeric" }),
         sensor: Math.round(sensorAvg * 10) / 10,
         block: Math.round(blockAvg * 10) / 10,
@@ -95,12 +96,12 @@ export default function SensorDetailPage({
       });
     }
     return rows;
-  }, [history, sensor]);
+  }, [history, activeSensor]);
 
-  const hasAlert = ALERTS.some((a) => a.sensorId === sensor.id);
-  const isMoisture = sensor.type === "soil_moisture";
+  const hasAlert = ALERTS.some((a) => a.sensorId === activeSensor.id);
+  const isMoisture = activeSensor.type === "soil_moisture";
 
-  const typeLabel: Record<typeof sensor.type, string> = {
+  const typeLabel: Record<typeof activeSensor.type, string> = {
     soil_moisture: "Soil moisture",
     temperature: "Temperature",
     humidity: "Humidity",
@@ -108,13 +109,16 @@ export default function SensorDetailPage({
   };
 
   const icon =
-    sensor.type === "soil_moisture" ? (
+    activeSensor.type === "soil_moisture" ? (
       <Droplets className="w-5 h-5 text-blue-500" />
-    ) : sensor.type === "temperature" ? (
+    ) : activeSensor.type === "temperature" ? (
       <Thermometer className="w-5 h-5 text-orange-500" />
     ) : (
       <Activity className="w-5 h-5 text-primary" />
     );
+
+
+  if (!sensor) return notFound();
 
   return (
     <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
@@ -132,8 +136,7 @@ export default function SensorDetailPage({
                 </div>
                 <h1 className="text-2xl font-bold">{sensor.name}</h1>
                 <div className="text-sm text-muted-foreground mt-1">
-                  Routed via {sensor.routedVia} · Mode:{" "}
-                  {sensor.routedVia.startsWith("S-") ? "LoRa mesh relay" : "LoRa"}
+                  Assigned Location: Block {sensor.block}
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2">
@@ -153,13 +156,16 @@ export default function SensorDetailPage({
                           : "slate"
                     }
                   >
-                    {sensor.status}
+                    Status: {sensor.status}
                   </Badge>
                   <Badge tone="slate">
-                    <Battery className="w-3 h-3" /> {sensor.battery}%
+                    <Battery className="w-3 h-3" /> Battery {sensor.battery}%
                   </Badge>
-                  <Badge tone="slate">
-                    <Signal className="w-3 h-3" /> {sensor.signalStrength}%
+                    <Badge tone="slate">
+                    <MapPin className="w-3 h-3" /> Coordinates: {sensor.lat.toFixed(2)}, {sensor.lng.toFixed(2)}
+                  </Badge>
+                  <Badge>
+                    <Route className="w-3 h-3" /> Routed via {sensor.routedVia}
                   </Badge>
                 </div>
               </div>
@@ -258,7 +264,7 @@ export default function SensorDetailPage({
                   </Insight>
                   <Insight>
                     Historical correlation: similar moisture patterns in 2024 led to
-                    an <b>8% yield reduction</b> in Cabernet blocks.
+                    an <b>8% yield reduction</b> in Block A.
                   </Insight>
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center justify-between">
                     <div>

@@ -36,6 +36,12 @@ type AnimatedPolylineProps = {
   className?: string;
 };
 
+function describeSensorReading(sensor: Sensor) {
+  if (sensor.type === "soil_moisture") {
+    if (sensor.lastReading <= 18) return "Warning: Low soil moisture.";
+  }
+}
+
 function sensorIcon(sensor: Sensor, highlight = false) {
   const cls = sensor.status;
   return L.divIcon({
@@ -344,8 +350,10 @@ export default function FarmMap({
             <Tooltip>
               <strong>{s.name}</strong>
               <br />
-              {s.lastReading}
-              {s.unit} · routed via {s.routedVia}
+              {typeLabel(s.type)}: {s.lastReading}
+              {s.unit}
+              <br />
+              {describeSensorReading(s)}
             </Tooltip>
           </Marker>
         ))}
@@ -370,4 +378,14 @@ export default function FarmMap({
         ))}
     </MapContainer>
   );
+}
+
+function typeLabel(type: Sensor["type"]) {
+  return type === "soil_moisture"
+    ? "Soil moisture"
+    : type === "temperature"
+      ? "Temperature"
+      : type === "humidity"
+        ? "Humidity"
+        : "Soil pH";
 }

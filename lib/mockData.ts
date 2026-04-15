@@ -176,12 +176,12 @@ export const ALERTS: Alert[] = [
   {
     id: "A-1",
     severity: "critical",
-    title: "Soil moisture critical — Sensor 1",
+    title: "Sensor 1 - Soil moisture critical reading",
     message:
       "Moisture dropped below 18%. Irrigation recommended within 6 hours to avoid yield loss.",
     sensorId: "S-001",
     timestamp: "14 min ago",
-    estimatedImpact: "~R12,400 potential yield loss if untreated",
+    estimatedImpact: "~R12,400 potential damage if untreated",
   },
   {
     id: "A-2",

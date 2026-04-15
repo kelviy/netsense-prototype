@@ -29,7 +29,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold">{FARM.name}</h1>
           <div className="text-xs text-muted-foreground">
-            {FARM.location} · {FARM.hectares} ha
+            <b>Location:</b> {FARM.location} · <b>Calibrated Area:</b> {FARM.hectares} ha
           </div>
         </div>
         <div className="flex items-center gap-3">
