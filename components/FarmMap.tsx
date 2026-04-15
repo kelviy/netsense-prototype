@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -28,6 +28,12 @@ type Props = {
   onSensorClick?: (id: string) => void;
   onNodeClick?: (id: string) => void;
   highlightSensorId?: string;
+};
+
+type AnimatedPolylineProps = {
+  positions: [number, number][];
+  pathOptions: L.PolylineOptions;
+  className?: string;
 };
 
 function sensorIcon(sensor: Sensor, highlight = false) {
@@ -66,6 +72,33 @@ function FitBounds() {
     map.fitBounds(b, { padding: [30, 30] });
   }, [map]);
   return null;
+}
+
+function AnimatedPolyline({ positions, pathOptions, className }: AnimatedPolylineProps) {
+  const polylineRef = useRef<L.Polyline | null>(null);
+
+  useEffect(() => {
+    if (!className) return;
+
+    let frame = 0;
+    const classes = className.split(/\s+/).filter(Boolean);
+    const layer = polylineRef.current;
+
+    const applyClasses = () => {
+      const element = layer?.getElement();
+      if (element) element.classList.add(...classes);
+    };
+
+    frame = requestAnimationFrame(applyClasses);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      const element = layer?.getElement();
+      if (element) element.classList.remove(...classes);
+    };
+  }, [className, positions]);
+
+  return <Polyline ref={polylineRef} positions={positions} pathOptions={pathOptions} />;
 }
 
 export default function FarmMap({
@@ -225,15 +258,15 @@ export default function FarmMap({
       {/* Mesh node-to-node links */}
       {showMeshLinks &&
         meshLinks.map((l) => (
-          <Polyline
+          <AnimatedPolyline
             key={l.id}
             positions={[l.a, l.b]}
+            className="mesh-link-active"
             pathOptions={{
               color: l.degraded ? "#d97706" : "#16a34a",
               weight: l.degraded ? 2 : 3,
               opacity: 0.85,
               dashArray: "8 6",
-              className: "mesh-link-active",
             }}
           />
         ))}
@@ -244,15 +277,15 @@ export default function FarmMap({
           const color = l.rerouted ? "#16a34a" : "#22c55e";
           const weight = l.rerouted ? 3 : 1.5;
           return (
-            <Polyline
+            <AnimatedPolyline
               key={`sl-${l.id}`}
               positions={[l.from, l.to]}
+              className={l.rerouted ? "mesh-link-active" : undefined}
               pathOptions={{
                 color,
                 weight,
                 opacity: 0.9,
                 dashArray: l.rerouted ? "6 4" : undefined,
-                className: l.rerouted ? "mesh-link-active" : undefined,
               }}
             />
           );
@@ -260,36 +293,36 @@ export default function FarmMap({
 
       {/* Highlighted route for network page — N-02 to N-05 via S-003 and S-012 */}
       {showMeshLinks && mode === "network" && (
-        <Polyline
+        <AnimatedPolyline
           positions={[
             [getNode("N-02")!.lat, getNode("N-02")!.lng],
             [getSensor("S-003")!.lat, getSensor("S-003")!.lng],
             [getSensor("S-012")!.lat, getSensor("S-012")!.lng],
             [getNode("N-05")!.lat, getNode("N-05")!.lng],
           ]}
+          className="mesh-link-active highlight-route-active"
           pathOptions={{
             color: "#d97706",
             weight: 1,
             opacity: 0.9,
             dashArray: "4 6",
-            className: "mesh-link-active highlight-route-active",
           }}
         />
       )}
 
       {/* Highlighted route for dashboard — direct N-02 to N-05 */}
       {showMeshLinks && mode === "dashboard" && (
-        <Polyline
+        <AnimatedPolyline
           positions={[
             [getNode("N-02")!.lat, getNode("N-02")!.lng],
             [getNode("N-05")!.lat, getNode("N-05")!.lng],
           ]}
+          className="mesh-link-active dashboard-route-active"
           pathOptions={{
             color: "#d97706",
             weight: 3,
             opacity: 0.95,
             dashArray: "6 6",
-            className: "mesh-link-active dashboard-route-active",
           }}
         />
       )}
