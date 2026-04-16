@@ -328,7 +328,7 @@ export default function SensorDetailPage({
                       <div className="text-xs text-red-700 uppercase tracking-wide font-semibold">
                         Estimated yield damage
                       </div>
-                      <div className="text-2xl font-bold text-red-900">R12,400</div>
+                      <div className="text-2xl font-bold text-red-900">R12,000</div>
                     </div>
                     <Droplets className="w-8 h-8 text-red-400" />
                   </div>

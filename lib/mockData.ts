@@ -181,7 +181,7 @@ export const ALERTS: Alert[] = [
       "Moisture dropped below 18%. Irrigation recommended within 6 hours to avoid yield loss.",
     sensorId: "S-001",
     timestamp: "14 min ago",
-    estimatedImpact: "~R12,400 potential damage if untreated",
+    estimatedImpact: "~R12,000 potential damage if untreated",
   },
   {
     id: "A-2",

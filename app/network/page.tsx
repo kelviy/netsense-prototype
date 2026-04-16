@@ -16,7 +16,7 @@ import type { MeshNode } from "@/lib/types";
 
 export default function NetworkPage() {
   const [showFields, setShowFields] = useState(true);
-  const [showLoraRanges, setShowLoraRanges] = useState(true);
+  const [showLoraRanges, setShowLoraRanges] = useState(false);
   const [showHalowRanges, setShowHalowRanges] = useState(true);
   const [showSensorRanges, setShowSensorRanges] = useState(false);
   const [sortKey, setSortKey] = useState<"id" | "battery" | "status">("id");
@@ -36,7 +36,7 @@ export default function NetworkPage() {
   return (
     <div className="p-4 md:p-6 space-y-4 max-w-[1600px] mx-auto">
       <div>
-        <h1 className="text-2xl font-bold">Network health</h1>
+        <h1 className="text-2xl font-bold">Network</h1>
         <div className="text-xs text-muted-foreground">
           Decentralised mesh topology — resilient, farmer-owned network.
         </div>
