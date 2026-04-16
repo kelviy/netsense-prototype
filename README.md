@@ -1,6 +1,6 @@
 # NetSense — Investor Prototype
 
-NetSense is a decentralised mesh-network platform for smart farming that combines LoRa and Wi-Fi HaLow hardware into a self-organising sensor mesh. This repo is a polished, interactive 4-screen prototype built for a live investor pitch. All data is mocked; there is no backend.
+NetSense is a decentralised mesh-network platform for smart farming that combines LoRa and Wi-Fi HaLow hardware into a self-organising sensor mesh. This repo is a interactive prototype built for a live investor pitch. All data is mocked; there is no backend.
 
 ## Run locally
 
@@ -17,10 +17,6 @@ Open [http://localhost:3000](http://localhost:3000). On first load you are route
 - **`/dashboard`** — live farm overview with alerts, KPIs, map, and activity feed.
 - **`/sensors/[id]`** — 30-day history chart with threshold bands, NetSense insights, and block/farm benchmarking.
 - **`/network`** — mesh topology map with range circles, self-healing routing, node table, and growth recommendations.
-
-## Deploy
-
-Push to GitHub and import into Vercel — zero config, Next.js is auto-detected. No environment variables required.
 
 ## Notes
 
