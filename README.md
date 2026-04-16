@@ -2,6 +2,8 @@
 
 NetSense is a decentralised mesh-network platform for smart farming that combines LoRa and Wi-Fi HaLow hardware into a self-organising sensor mesh. This repo is a interactive prototype built for a live investor pitch. All data is mocked; there is no backend.
 
+Vercel Live Demo Site: https://netsense-prototype.vercel.app
+
 ## Run locally
 
 ```bash
